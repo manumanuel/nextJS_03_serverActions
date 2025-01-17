@@ -1,19 +1,41 @@
-import { storePost } from '@/lib/posts';
+import { redirect } from "next/navigation";
+import { useActionState } from "react";
+
+import FormSubmit from "@/components/form-submit";
+import { storePost } from "@/lib/posts";
 
 export default function NewPostPage() {
   async function createPost(formData) {
     "use server";
-    const title = formData.get('title');
-    const image = formData.get('image');
-    const content = formData.get('content');
+    const title = formData.get("title");
+    const image = formData.get("image");
+    const content = formData.get("content");
 
-    storePost({
-      imageUrl: '',
+    let errors = [];
+    if (!title || title.trim().length === 0) {
+      errors.push("Title is required");
+    }
+    if (!content || content.trim().length === 0) {
+      errors.push("Content is required");
+    }
+    if (!image || image.trim().length === 0) {
+      errors.push("Image is required");
+    }
+    if (image && !image.match(/\.(png|jpe?g)$/)) {
+      errors.push("Image must be a PNG or JPEG file");
+    }
+
+    await storePost({
+      imageUrl: "",
       title,
       content,
-      userId: 1
-    })
+      userId: 1,
+    });
+
+    redirect("/feed");
   }
+
+  const [state, setState] = useActionState(createPost, {});
 
   return (
     <>
@@ -37,8 +59,7 @@ export default function NewPostPage() {
           <textarea id="content" name="content" rows="5" />
         </p>
         <p className="form-actions">
-          <button type="reset">Reset</button>
-          <button>Create Post</button>
+          <FormSubmit />
         </p>
       </form>
     </>
