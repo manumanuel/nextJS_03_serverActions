@@ -1,4 +1,4 @@
-export default function LikeButton() {
+export default function LikeButton({ action }) {
   return (
     <button className="like-button">
       <svg
